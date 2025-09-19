@@ -23,7 +23,7 @@ class Size(models.Model): #model is a toolbox for django understanding. it has i
 #related naem: how we see it in admin panel
 class ProductSize(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE,
-                                related_name='product_size') #cascade also deletes all relations with original Product
+                                related_name='product_sizes') #cascade also deletes all relations with original Product
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     stock = models.PositiveBigIntegerField(default=0)
 

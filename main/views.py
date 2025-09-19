@@ -1,4 +1,4 @@
-from django.shortcuts import get_list_or_404 #render for functional views, get_list_or_404 for class views
+from django.shortcuts import get_object_or_404 #render for functional views, get_list_or_404 for class views
 from django.views.generic import TemplateView, DetailView
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
@@ -6,6 +6,7 @@ from .models import Category, Product, Size
 from django.db.models import Q #for search
 
 # Create your views here.
+
 class IndexView(TemplateView):
     template_name = 'main/base.html'
 
@@ -14,11 +15,11 @@ class IndexView(TemplateView):
         context['categories'] = Category.objects.all()
         context['current_category'] = None
         return context
-    
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
-            return TemplateResponse(request, 'main/home_context.html', context)
+            return TemplateResponse(request, 'main/home_content.html', context)
         return TemplateResponse(request, self.template_name, context)
 
 class CatalogView(TemplateView):
@@ -28,18 +29,18 @@ class CatalogView(TemplateView):
         'color': lambda queryset, value: queryset.filter(color__iexact=value),
         'min_price': lambda queryset, value: queryset.filter(price_gte=value),
         'max_price': lambda queryset, value: queryset.filter(price_lte=value),
-        'size': lambda queryset, value: queryset.filter(product_size__size__name=value),
+        'size': lambda queryset, value: queryset.filter(product_sizes__size__name=value),
     }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         category_slug = kwargs.get('category_slug')
         categories = Category.objects.all()
-        products = Product.objects.all().order_by('created_at')
+        products = Product.objects.all().order_by('-created_at')
         current_category = None
 
         if category_slug:
-            current_category = get_list_or_404(Category, slug=category_slug)
+            current_category = get_object_or_404(Category, slug=category_slug)
             products = products.filter(category=current_category)
 
         query = self.request.GET.get('q')
@@ -88,7 +89,7 @@ class CatalogView(TemplateView):
     
 class ProductDetailView(DetailView):
     model = Product
-    template_name = 'main.base/html'
+    template_name = 'main/base.html'
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
 
@@ -106,5 +107,5 @@ class ProductDetailView(DetailView):
         self.object = self.get_object()
         context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
-            return TemplateResponse(request, 'main.product_detail.html', context)
+            return TemplateResponse(request, 'main/product_detail.html', context)
         raise TemplateResponse(request, self.template_name, context) #if not htmx request
