@@ -35,7 +35,7 @@ class Product(models.Model):
     slug = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='products') #copies category params
-    colors = models.CharField(max_length=100)
+    color = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True)
     main_image = models.ImageField(upload_to='products/main/')
